@@ -11,9 +11,13 @@
 
 <html>
 <head>
-    <title>login</title>
+    <jsp:include page="partials/head.jsp">
+        <jsp:param name="title" value="Login Page"/>
+    </jsp:include>
 </head>
 <body style="text-align: center">
+<%@ include file="partials/navbar.jsp" %>
+
 <h3>Site Login:</h3>
 
 <c:if test="${param.username == 'admin' && param.password == 'password'}">
@@ -21,11 +25,13 @@
     <% response.sendRedirect(redirectURL);%>
 </c:if>
 
-    <form method="POST">
-        <input type="text" name="username" placeholder="enter username">
-        <input type="password" name="password" placeholder="enter password">
-        <button type="submit">Go!</button>
-    </form>
+<form method="POST">
+    <input type="text" name="username" placeholder="enter username">
+    <input type="password" name="password" placeholder="enter password">
+    <button type="submit">Go!</button>
+</form>
 
+<%@ include file="partials/footer.jsp" %>
+<%@ include file="partials/footer-scripts.jsp" %>
 </body>
 </html>
