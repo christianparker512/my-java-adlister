@@ -3,15 +3,13 @@
 <html>
 <head>
     <jsp:include page="partials/head.jsp">
-        <jsp:param name="title" value="AdLister Home"/>
+        <jsp:param name="title" value="Welcome to my site!" />
     </jsp:include>
 </head>
-<body style="text-align: center">
-<%@ include file="partials/navbar.jsp" %>
-
-<h2>Welcome to the site!</h2>
-
-<%@ include file="partials/footer.jsp" %>
-<%@ include file="partials/footer-scripts.jsp" %>
+<body>
+    <jsp:include page="partials/navbar.jsp" />
+    <div class="container">
+        <h1>Welcome to the Adlister!</h1>
+    </div>
 </body>
 </html>
