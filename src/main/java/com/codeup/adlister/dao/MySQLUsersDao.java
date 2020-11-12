@@ -3,38 +3,11 @@ package com.codeup.adlister.dao;
 import com.codeup.adlister.models.User;
 import com.mysql.cj.jdbc.Driver;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
 
-public class MySQLUsersDao implements Users{
-    private Connection connection = null;
+public class MySQLUsersDao implements Users {
+    private Connection connection;
 
-    public boolean validate(User user) throws ClassNotFoundException, SQLException {
-        boolean status = false;
-        Class.forName("com.mysql.jdbc.Driver");
-        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/adlister_db?serverTimezone=UTC&useSSL=false", "root", "codeup")) {
-            PreparedStatement preparedStatement = connection
-                    .prepareStatement("select * from users where username = ? and password = ? ");
-            {
-                preparedStatement.setString(1, User.getUsername());
-                preparedStatement.setString(2, User.getPassword());
-
-                System.out.println(preparedStatement);
-                ResultSet rs = preparedStatement.executeQuery();
-                status = rs.next();
-
-            }
-        }catch (SQLException e) {
-                throw new RuntimeException("Error creating a new ad.", e);
-            }
-            return status;
-        }
-    }
     public MySQLUsersDao(Config config) {
         try {
             DriverManager.registerDriver(new Driver());
@@ -49,42 +22,39 @@ public class MySQLUsersDao implements Users{
     }
 
     @Override
-    public String findByUsername(String username) {
-        Statement stmt = null;
+    public User findByUsername(String username) {
+        String query = "SELECT * FROM users WHERE username = ? LIMIT 1";
         try {
-            stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT FROM user where");
-            return username;
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, username);
+
+            return extractUser(stmt.executeQuery());
         } catch (SQLException e) {
-            throw new RuntimeException("Error retrieving user.");
+            throw new RuntimeException("Error finding a user by username", e);
         }
     }
 
     @Override
     public Long insert(User user) {
+        String query = "INSERT INTO users(username, email, password) VALUES (?, ?, ?)";
         try {
-            PreparedStatement stmt = connection.prepareStatement(createInsertQuery(user), Statement.RETURN_GENERATED_KEYS);
-            stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getUsername());
+            PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getPassword());
             stmt.executeUpdate();
-
             ResultSet rs = stmt.getGeneratedKeys();
             rs.next();
             return rs.getLong(1);
         } catch (SQLException e) {
-            throw new RuntimeException("Error creating a new user.", e);
+            throw new RuntimeException("Error creating new user", e);
         }
     }
 
-    private String createInsertQuery(User user){
-        return "INSERT INTO users(username, email, password) VALUES "
-                + "(" + user.getUsername() + ") "
-                + "(" + user.getEmail() + ") "
-                + "(" + user.getPassword() + "') ";
-    }
-
-    private User extractUser(ResultSet rs) throws SQLException{
+    private User extractUser(ResultSet rs) throws SQLException {
+        if (! rs.next()) {
+            return null;
+        }
         return new User(
                 rs.getLong("id"),
                 rs.getString("username"),
@@ -92,11 +62,5 @@ public class MySQLUsersDao implements Users{
                 rs.getString("password")
         );
     }
-    private List<User> createUserFromResults(ResultSet rs) throws SQLException {
-        List<User> users = new ArrayList<>();
-        while (rs.next()){
-            users.add(extractUser(rs));
-        }
-        return users;
-    }
+
 }

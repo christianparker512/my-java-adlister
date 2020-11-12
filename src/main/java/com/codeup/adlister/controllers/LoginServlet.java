@@ -1,5 +1,8 @@
 package com.codeup.adlister.controllers;
-import com.codeup.adlister.dao.MySQLUsersDao;
+
+import com.codeup.adlister.dao.DaoFactory;
+import com.codeup.adlister.models.User;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,17 +24,17 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
+        User dbUser = DaoFactory.getUsersDao().findByUsername(username);
 
-        // TODO: find a record in your database that matches the submitted password
-        // TODO: make sure we find a user with that username
+        if (dbUser == null) {
+            response.sendRedirect("/login");
+            return;
+        }
 
-        // TODO: check the submitted password against what you have in your database
-        boolean validAttempt = false;
+        boolean validAttempt = BCrypt.checkpw(password, dbUser.getPassword());
 
         if (validAttempt) {
-            // TODO: store the logged in user object in the session, instead of just the username
-            request.getSession().setAttribute("user", username);
-
+            request.getSession().setAttribute("user", dbUser);
             response.sendRedirect("/profile");
         } else {
             response.sendRedirect("/login");

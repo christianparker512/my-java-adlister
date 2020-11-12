@@ -1,7 +1,7 @@
 USE adlister_db;
 
-DROP TABLE IF EXISTS ads;
-DROP TABLE IF EXISTS users;
+DROP TABLE ads;
+DROP TABLE users;
 
 CREATE TABLE users (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -21,5 +21,4 @@ CREATE TABLE ads (
         ON DELETE CASCADE
 );
 
-INSERT INTO users(username, email, password)
-VALUES ('admin', 'admin@codeup.com', 'codeup');
+INSERT INTO users(username, email, password) VALUES ('donelle', 'donelle@codeup.com', 'password');
